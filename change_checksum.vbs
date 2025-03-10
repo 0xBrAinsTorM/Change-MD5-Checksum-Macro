@@ -20,7 +20,7 @@ bin.LoadFromFile Filename
 Bytearray = bin.Read
 bin.Close
 
-' Prüfen, ob Bytearray ein Array ist
+' Prüfen, ob Bytearray tatsächlich ein Array ist
 If IsArray(Bytearray) Then
     ' Neues Array mit zusätzlichem Null-Byte erstellen
     Arraylength = UBound(Bytearray)
@@ -43,7 +43,12 @@ End If
 Set bin = CreateObject("ADODB.Stream")
 bin.Type = 1
 bin.Open
-bin.Write Join(tempArray, "")
+
+' Bytearray zurück in den Stream schreiben
+For i = 0 To UBound(tempArray)
+    bin.Write ChrB(tempArray(i)) ' Hier wird Byte für Byte in den Stream geschrieben
+Next
+
 bin.Position = 0
 
 ' Zielverzeichnis für neue Datei setzen
