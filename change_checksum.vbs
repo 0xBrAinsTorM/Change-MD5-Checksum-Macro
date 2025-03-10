@@ -20,23 +20,38 @@ bin.LoadFromFile Filename
 Bytearray = bin.Read
 bin.Close
 
-' Prüfen, ob Bytearray ein Array ist
+' Prüfen, ob Bytearray tatsächlich ein Array ist
 If Not IsArray(Bytearray) Then
     WScript.Echo "Fehler: Bytearray konnte nicht erstellt werden."
     WScript.Quit
 End If
 
-' Bytearray um ein Null-Byte erweitern
+' Neues Bytearray mit zusätzlichem Null-Byte erstellen
 Arraylength = UBound(Bytearray)
-ReDim Preserve Bytearray(Arraylength + 1)
-Bytearray(Arraylength + 1) = 0  ' Null-Byte ans Ende setzen
+Dim tempArray()
+ReDim tempArray(Arraylength + 1)
 
-' Neuen Stream für das Schreiben öffnen
+' Originaldaten kopieren
+Dim i
+For i = 0 To Arraylength
+    tempArray(i) = Bytearray(i)
+Next
+
+' Null-Byte anhängen
+tempArray(Arraylength + 1) = 0
+
+' *** Hier kommt der entscheidende Fix ***
+' Neues ADODB.Stream-Objekt verwenden
 Set bin = CreateObject("ADODB.Stream")
 bin.Type = 1  ' Binärmodus
 bin.Open
-bin.Write Bytearray  ' Bytearray direkt schreiben
-bin.Position = 0
+
+' Bytearray in den Stream umwandeln (Byte für Byte schreiben)
+For i = 0 To UBound(tempArray)
+    bin.Write ChrB(tempArray(i)) ' Hier wird Byte für Byte in den Stream geschrieben
+Next
+
+bin.Position = 0  ' Sicherstellen, dass der Stream am Anfang steht
 
 ' Zielverzeichnis für neue Datei setzen
 Set objShell = CreateObject("WScript.Shell")
