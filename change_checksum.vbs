@@ -22,29 +22,21 @@ bin.Close
 
 ' Prüfen, ob Bytearray tatsächlich ein Array ist
 If IsArray(Bytearray) Then
-    ' Sicherstellen, dass es als echtes Array behandelt wird
-    Dim tempArray()
-    ReDim tempArray(UBound(Bytearray))
-
-    ' Bytes kopieren
-    For i = 0 To UBound(Bytearray)
-        tempArray(i) = Bytearray(i)
-    Next
-
-    ' Null-Byte anhängen
-    Arraylength = UBound(tempArray)
-    ReDim Preserve tempArray(Arraylength + 1)
-    tempArray(Arraylength + 1) = 0
+    ' Bytearray um ein Null-Byte erweitern
+    Arraylength = UBound(Bytearray)
+    ReDim Preserve Bytearray(Arraylength + 1)
+    Bytearray(Arraylength + 1) = 0
 Else
     WScript.Echo "Fehler: Bytearray konnte nicht erstellt werden."
     WScript.Quit
 End If
 
-' Stream erneut öffnen und schreiben
-bin.Open
+' Neuen Stream für das Schreiben öffnen
+Set bin = CreateObject("ADODB.Stream")
 bin.Type = 1
-bin.Write tempArray  ' Hier war vorher der Fehler
-bin.Position = 0  ' Sicherstellen, dass der Stream am Anfang ist
+bin.Open
+bin.Write Bytearray  ' Korrekt: Bytearray wird direkt geschrieben
+bin.Position = 0
 
 ' Zielverzeichnis für neue Datei setzen
 Set objShell = CreateObject("WScript.Shell")
