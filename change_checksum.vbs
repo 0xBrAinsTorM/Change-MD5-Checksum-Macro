@@ -3,7 +3,7 @@ Option Explicit
 Dim sourceFile, destFile, tempFolder
 Dim objShell, fso
 Dim binIn, binOut
-Dim byteData()
+Dim byteData, nullByte
 
 ' Original-Dateipfad
 sourceFile = "C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe"
@@ -26,20 +26,20 @@ binIn.Type = 1  ' 1 = Binärmodus
 binIn.Open
 binIn.LoadFromFile sourceFile
 
-' **Schritt 2: Datei als Bytearray einlesen**
-byteData = binIn.Read
+' **Schritt 2: Datei als Binärdaten einlesen**
+byteData = binIn.Read  ' Binärdaten als Variant speichern
 binIn.Close
 Set binIn = Nothing
 
-' **Schritt 3: Null-Byte am Ende hinzufügen**
-ReDim Preserve byteData(UBound(byteData) + 1)
-byteData(UBound(byteData)) = 0
+' **Schritt 3: Null-Byte (`0x00`) anfügen**
+nullByte = ChrB(0)  ' Erzeugt ein einzelnes Null-Byte
 
 ' **Schritt 4: Neue Datei schreiben**
 Set binOut = CreateObject("ADODB.Stream")
 binOut.Type = 1  ' Wieder Binärmodus
 binOut.Open
-binOut.Write byteData
+binOut.Write byteData  ' Ursprüngliche Binärdaten schreiben
+binOut.Write nullByte  ' Null-Byte hinzufügen
 binOut.SaveToFile destFile, 2  ' 2 = Überschreiben
 binOut.Close
 Set binOut = Nothing
