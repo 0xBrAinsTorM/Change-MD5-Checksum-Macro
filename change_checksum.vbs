@@ -7,6 +7,7 @@ Dim dir
 Dim name
 Dim retval
 Dim objShell
+Dim i
 
 Filename = "C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe"
 
@@ -15,26 +16,35 @@ bin.Type = 1
 bin.Open
 bin.LoadFromFile Filename
 
-' In eine Variante laden und in ein Byte-Array konvertieren
+' Bytearray als Variant speichern
 Bytearray = bin.Read
 bin.Close
 
-' Sicherstellen, dass Bytearray ein echtes Array ist
-Dim i, tempArray()
-ReDim tempArray(UBound(Bytearray))
+' Prüfen, ob Bytearray tatsächlich ein Array ist
+If IsArray(Bytearray) Then
+    ' Sicherstellen, dass es als echtes Array behandelt wird
+    Dim tempArray()
+    ReDim tempArray(UBound(Bytearray))
 
-For i = 0 To UBound(Bytearray)
-    tempArray(i) = Bytearray(i)
-Next
+    ' Bytes kopieren
+    For i = 0 To UBound(Bytearray)
+        tempArray(i) = Bytearray(i)
+    Next
 
-' Null-Byte anhängen
-Arraylength = UBound(tempArray)
-ReDim Preserve tempArray(Arraylength + 1)
-tempArray(Arraylength + 1) = 0
+    ' Null-Byte anhängen
+    Arraylength = UBound(tempArray)
+    ReDim Preserve tempArray(Arraylength + 1)
+    tempArray(Arraylength + 1) = 0
+Else
+    WScript.Echo "Fehler: Bytearray konnte nicht erstellt werden."
+    WScript.Quit
+End If
 
 ' Stream erneut öffnen und schreiben
 bin.Open
-bin.Write tempArray
+bin.Type = 1
+bin.Write tempArray  ' Hier war vorher der Fehler
+bin.Position = 0  ' Sicherstellen, dass der Stream am Anfang ist
 
 ' Zielverzeichnis für neue Datei setzen
 Set objShell = CreateObject("WScript.Shell")
