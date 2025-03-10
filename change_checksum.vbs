@@ -7,48 +7,35 @@ Dim dir
 Dim name
 Dim retval
 Dim objShell
-Dim i
 
 Filename = "C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe"
 
+' Datei als Binärdaten in Stream laden
 Set bin = CreateObject("ADODB.Stream")
-bin.Type = 1
+bin.Type = 1  ' Binärmodus
 bin.Open
 bin.LoadFromFile Filename
 
-' Bytearray als Variant speichern
+' Bytearray aus Datei lesen
 Bytearray = bin.Read
 bin.Close
 
-' Prüfen, ob Bytearray tatsächlich ein Array ist
-If IsArray(Bytearray) Then
-    ' Neues Array mit zusätzlichem Null-Byte erstellen
-    Arraylength = UBound(Bytearray)
-    Dim tempArray()
-    ReDim tempArray(Arraylength + 1)
-
-    ' Originaldaten kopieren
-    For i = 0 To Arraylength
-        tempArray(i) = Bytearray(i)
-    Next
-
-    ' Null-Byte hinzufügen
-    tempArray(Arraylength + 1) = 0
-Else
+' Prüfen, ob Bytearray ein Array ist
+If Not IsArray(Bytearray) Then
     WScript.Echo "Fehler: Bytearray konnte nicht erstellt werden."
     WScript.Quit
 End If
 
+' Bytearray um ein Null-Byte erweitern
+Arraylength = UBound(Bytearray)
+ReDim Preserve Bytearray(Arraylength + 1)
+Bytearray(Arraylength + 1) = 0  ' Null-Byte ans Ende setzen
+
 ' Neuen Stream für das Schreiben öffnen
 Set bin = CreateObject("ADODB.Stream")
-bin.Type = 1
+bin.Type = 1  ' Binärmodus
 bin.Open
-
-' Bytearray zurück in den Stream schreiben
-For i = 0 To UBound(tempArray)
-    bin.Write ChrB(tempArray(i)) ' Hier wird Byte für Byte in den Stream geschrieben
-Next
-
+bin.Write Bytearray  ' Bytearray direkt schreiben
 bin.Position = 0
 
 ' Zielverzeichnis für neue Datei setzen
